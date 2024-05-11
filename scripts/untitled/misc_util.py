@@ -156,7 +156,8 @@ def save_state_dict(state_dict,name,settings,timer=None):
     global recently_saved
     fileext = ".fp16.safetensors" if 'fp16' in settings else '.safetensors'
 
-    filename_no_ext = os.path.join(paths_internal.models_path,'Stable-diffusion',name)
+    checkpoint_dir = shared.cmd_opts.ckpt_dir or os.path.join(paths_internal.models_path, 'Stable-diffusion')
+    filename_no_ext = os.path.join(checkpoint_dir, name)
     try:
         filename_no_ext = filename_no_ext[0:225]
     except: pass
