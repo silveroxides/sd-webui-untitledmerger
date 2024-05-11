@@ -549,7 +549,7 @@ def calcmode_changed(calcmode_name):
 
 
 def get_checkpoints_list(sort):
-    checkpoints_list = [checkpoint for checkpoint in sd_models.checkpoint_tiles() if checkpoint.split(' ')[0].endswith('.safetensors')]
+    checkpoints_list = [x.title for x in sd_models.checkpoints_list.values() if x.is_safetensors]
     if sort == 'Newest first':
         sort_func = lambda x: os.path.getctime(sd_models.get_closet_checkpoint_match(x).filename)
         checkpoints_list.sort(key=sort_func,reverse=True)
