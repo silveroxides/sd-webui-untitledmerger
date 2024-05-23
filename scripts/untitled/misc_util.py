@@ -9,52 +9,51 @@ import scripts.untitled.common as cmn
 networks = script_loading.load_module(os.path.join(paths.extensions_builtin_dir,'Lora','networks.py'))
 
 
+
+
 BASE_SELECTORS = {
-    "all":  "",
-    "clip": "cond",
-    "base": "cond",
-    "unet": "model\\.diffusion_model",
-    "in":   "model\\.diffusion_model\\.input_blocks",
-    "out":  "model\\.diffusion_model\\.output_blocks",
-    "mid":  "model\\.diffusion_model\\.middle_block"
+    "all":  ".*",  # Adjusted to match anything
+    "clip": "cond.*",
+    "base": "cond.*",
+    "model_ema":  "model_ema.*",
+    "unet": "model\\.diffusion_model.*",
+    "in":   "model\\.diffusion_model\\.input_blocks.*",
+    "out":  "model\\.diffusion_model\\.output_blocks.*",
+    "mid":  "model\\.diffusion_model\\.middle_block.*"
 }
 
-
-def target_to_regex(target_input: str|list) -> re.Pattern:
-    target_list = target_input if isinstance(target_input,list) else [target_input]
+def target_to_regex(target_input: str|list) -> str:
+    target_list = target_input if isinstance(target_input, list) else [target_input]
 
     targets = []
     for target_name in target_list:
-        if target_name.endswith(('.','-')):
-            target_name = target_name[:-1]
-        target = re.split("\.|:",target_name.lower())
+        # Handle '*' for wildcard functionality, escaping other characters as needed
+        target_name = re.escape(target_name).replace(r'\*', '.*')
 
+        if target_name.endswith(('-',)):
+            target_name = target_name[:-1]
+
+        # No longer splitting by ':' as it was not used in previous examples
         regex = "^"
 
-        if target[0] in BASE_SELECTORS:
-            regex += BASE_SELECTORS[target.pop(0)]
-            
-        for selector in target:
-            #Check if the selector qualifies as a number
-            if re.search(r'^[\d,-]*$',selector):
-                #Turns number inputs like "2-5,10" in to "2|3|4|5|10"
-                splitnumeric = set(selector.split(','))
-                for segment in splitnumeric.copy():
-                    if '-' in segment:
-                        a, b = segment.split('-')
-                        valuerange = [str(i) for i in range(int(a),int(b)+1)]
-                        splitnumeric.remove(segment)
-                        splitnumeric.update(valuerange)
-                formattedselector = '|'.join(splitnumeric)
-
-                regex += f"\\D*\\.(?:{formattedselector})\\."
+        # Check if we want to match all keys, represented by a '*' input
+        if target_name.strip() == '.*':  # Adjusted to check for '.*' after escaping
+            regex += ".*"  # Matches anything
+        else:
+            # Construct regex based on the processed input
+            if target_name in BASE_SELECTORS:
+                regex += BASE_SELECTORS[target_name]
             else:
-                regex += f".*{re.escape(selector)}"
-        regex += ".*$"
+                regex += target_name
+
+        # Making the ending flexible to match keys without 'bias' or 'weight'
+        regex += "$"  # Ends the pattern, ensuring it matches the end of the string
+
         targets.append(regex)
     
     regex = '|'.join(targets)
     return regex
+
     
 
 versions = {

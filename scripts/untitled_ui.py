@@ -103,21 +103,21 @@ def on_ui_tabs():
                     slider_scale = 8
                     with gr.Column(variant='compact',min_width=150,scale=slider_scale):
                         with gr.Row():
-                            model_a = gr.Dropdown(get_checkpoints_list('Alphabetical'), label="model_a",scale=slider_scale)
+                            model_a = gr.Dropdown(get_checkpoints_list('Alphabetical'), label="model_a [Primary]",scale=slider_scale)
                             swap_models_AB = gr.Button(value='⇆', elem_classes=["tool"],scale=1)
                         model_a_info = gr.HTML(plaintext_to_html('None | None',classname='untitled_sd_version'))
                         model_a.change(fn=checkpoint_changed,inputs=model_a,outputs=model_a_info).then(fn=update_model_a_keys, inputs=model_a)
 
                     with gr.Column(variant='compact',min_width=150,scale=slider_scale):
                         with gr.Row():
-                            model_b = gr.Dropdown(get_checkpoints_list('Alphabetical'), label="model_b",scale=slider_scale)
+                            model_b = gr.Dropdown(get_checkpoints_list('Alphabetical'), label="model_b [Secondary]",scale=slider_scale)
                             swap_models_BC = gr.Button(value='⇆', elem_classes=["tool"],scale=1)
                         model_b_info = gr.HTML(plaintext_to_html('None | None',classname='untitled_sd_version'))
                         model_b.change(fn=checkpoint_changed,inputs=model_b,outputs=model_b_info)
 
                     with gr.Column(variant='compact',min_width=150,scale=slider_scale):
                         with gr.Row():
-                            model_c = gr.Dropdown(get_checkpoints_list('Alphabetical'), label="model_c",scale=slider_scale)
+                            model_c = gr.Dropdown(get_checkpoints_list('Alphabetical'), label="model_c [Tertiary]",scale=slider_scale)
                             refresh_button = gr.Button(value='🔄', elem_classes=["tool"],scale=1)
                         model_c_info = gr.HTML(plaintext_to_html('None | None',classname='untitled_sd_version'))
                         model_c.change(fn=checkpoint_changed,inputs=model_c,outputs=model_c_info)
@@ -146,10 +146,10 @@ def on_ui_tabs():
 
                 ##### MAIN SLIDERS
                 with gr.Row(equal_height=True):
-                    alpha = gr.Slider(minimum=-1,step=0.01,maximum=2,label="slider_a (alpha)",info='model_a - model_b',value=0.5,elem_classes=['main_sliders'])
-                    beta = gr.Slider(minimum=-1,step=0.01,maximum=2,label="slider_b (beta)",info='-',value=0.5,elem_classes=['main_sliders'])
-                    gamma = gr.Slider(minimum=-1,step=0.01,maximum=2,label="slider_c (gamma)",info='-',value=0.25,elem_classes=['main_sliders'])
-                    delta = gr.Slider(minimum=-1,step=0.01,maximum=2,label="slider_d (delta)",info='-',value=0.25,elem_classes=['main_sliders'])
+                    alpha = gr.Slider(minimum=-1,step=0.01,maximum=2,label="slider_a [α] (alpha)",info='model_a - model_b',value=0.5,elem_classes=['main_sliders'])
+                    beta = gr.Slider(minimum=-1,step=0.01,maximum=2,label="slider_b [β] (beta)",info='-',value=0.5,elem_classes=['main_sliders'])
+                    gamma = gr.Slider(minimum=-1,step=0.01,maximum=2,label="slider_c [γ] (gamma)",info='-',value=0.25,elem_classes=['main_sliders'])
+                    delta = gr.Slider(minimum=-1,step=0.01,maximum=2,label="slider_d [δ] (delta)",info='-',value=0.25,elem_classes=['main_sliders'])
 
                 mode_selector.change(fn=calcmode_changed, inputs=[mode_selector], outputs=[mode_selector,alpha,beta,gamma,delta],show_progress='hidden')
 
@@ -179,7 +179,7 @@ def on_ui_tabs():
                 with gr.Accordion(label='Include/Exclude/Discard',open=False):
                     with gr.Row():
                         with gr.Column():
-                            clude = gr.Textbox(max_lines=4,label='Include/Exclude:',info='Entered targets will remain as model_a when set to \'Exclude\', and will be the only ones to be merged if set to \'Include\'. Separate with withspace.',value='clip.emb',lines=4,scale=4)
+                            clude = gr.Textbox(max_lines=4,label='Include/Exclude:',info='Entered targets will remain as model_a when set to \'Exclude\', and will be the only ones to be merged if set to \'Include\'. Separate with withspace.',value='clip',lines=4,scale=4)
                             clude_mode = gr.Radio(label="",info="",choices=["Exclude",("Include exclusively",'include')],value='Exclude',min_width=300,scale=1)
                         discard = gr.Textbox(max_lines=5,label='Discard:',info="Targets will be removed from the model, only applies to autosaved models. Separate with whitespace.",value='model_ema',lines=5,scale=1)
 
@@ -400,7 +400,7 @@ def on_ui_tabs():
                 #            )
 
                 with gr.Accordion('Model keys'):
-                    target_tester = gr.Textbox(max_lines=1,show_label=False,info="",interactive=True,placeholder='out.4.tran.norm.weight')
+                    target_tester = gr.Textbox(max_lines=1,label="Checks model_a keys using simple expression.",info="'*' is used as wildcard. Start expression with 'cond*' for clip. 'c*embedders.0*' for small clip. 'c*embedders.1*' for big clip. 'model.*' for unet and 'model_ema*' for ema unet",interactive=True,placeholder='model.*out*4*tran*norm*weight')
                     target_tester_display = gr.Textbox(max_lines=40,lines=40,label="Targeted keys:",info="",interactive=False)
                     target_tester.change(fn=test_regex,inputs=[target_tester],outputs=target_tester_display,show_progress='minimal')
 
