@@ -118,7 +118,7 @@ def on_ui_tabs():
                     with gr.Column(variant='compact',min_width=150,scale=slider_scale):
                         with gr.Row():
                             model_c = gr.Dropdown(get_checkpoints_list('Alphabetical'), label="model_c [Tertiary]",scale=slider_scale)
-                            refresh_button = gr.Button(value='⇆', elem_classes=["tool"],scale=1)
+                            swap_models_CD = gr.Button(value='⇆', elem_classes=["tool"],scale=1)
                         model_c_info = gr.HTML(plaintext_to_html('None | None',classname='untitled_sd_version'))
                         model_c.change(fn=checkpoint_changed,inputs=model_c,outputs=model_c_info)
 
