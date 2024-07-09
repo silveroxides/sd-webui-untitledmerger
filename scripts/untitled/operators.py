@@ -240,6 +240,97 @@ class InterpolateDifference(Operation):
         res = a * (1 - interpolated_mask) + b * interpolated_mask
         return res
 
+class ManualEnhancedInterpolateDifference(Operation):
+    def __init__(self, key, alpha, beta, gamma, delta, seed, *sources):
+        super().__init__(key, *sources)
+        self.alpha = alpha  # Interpolation strength
+        self.beta = beta    # Lower threshold for mean differences
+        self.gamma = gamma  # Upper threshold for mean differences
+        self.delta = delta  # Smoothness factor
+        self.seed = seed    # Seed for random number generation
+
+    def oper(self, a, b):
+        # Calculate absolute differences
+        delta = torch.abs(a - b)
+        
+        # Normalize differences
+        diff = (torch.max(delta) - delta) / torch.max(delta)
+        diff = torch.nan_to_num(diff)
+        
+        # Calculate mean differences
+        mean_diff = torch.mean(diff, 0, keepdim=True)
+        
+        # Create mask based on mean differences
+        mask = torch.logical_and(self.beta < mean_diff, mean_diff < self.gamma)
+        
+        # Apply power function to differences
+        powered_diff = diff ** (1 / max(self.alpha, 0.001) - 1)
+        powered_diff = torch.nan_to_num(powered_diff)
+        
+        # Apply mask to powered differences
+        masked_diff = powered_diff * mask.float()
+        
+        # Generate random mask
+        rng = torch.Generator(device=a.device)
+        rng.manual_seed(self.seed)
+        random_mask = torch.bernoulli(torch.clamp(masked_diff, 0, 1), generator=rng)
+        
+        # Interpolate between random mask and powered differences
+        interpolated_mask = torch.lerp(random_mask, masked_diff, self.delta)
+        
+        # Apply final interpolation
+        result = a * (1 - interpolated_mask) + b * interpolated_mask
+        
+        return result.to(a.dtype)
+
+class AutoEnhancedInterpolateDifference(Operation):
+    def __init__(self, key, alpha, beta, gamma, seed, *sources):
+        super().__init__(key, *sources)
+        self.alpha = alpha  # Interpolation strength
+        self.beta = beta    # Threshold adjustment factor
+        self.gamma = gamma  # Smoothness factor
+        self.seed = seed    # Seed for random number generation
+
+    def oper(self, a, b):
+        # Calculate absolute differences
+        delta = torch.abs(a - b)
+        
+        # Normalize differences
+        max_delta = torch.max(delta)
+        diff = (max_delta - delta) / max_delta
+        diff = torch.nan_to_num(diff)
+        
+        # Calculate mean differences
+        mean_diff = torch.mean(diff)
+        
+        # Dynamically set lower and upper thresholds
+        lower_threshold = mean_diff * (1 - self.beta)
+        upper_threshold = mean_diff * (1 + self.beta)
+        
+        # Create mask based on dynamic thresholds
+        mask = torch.logical_and(lower_threshold < diff, diff < upper_threshold)
+        
+        # Apply power function to differences
+        powered_diff = diff ** (1 / max(self.alpha, 0.001) - 1)
+        powered_diff = torch.nan_to_num(powered_diff)
+        
+        # Apply mask to powered differences
+        masked_diff = powered_diff * mask.float()
+        
+        # Generate random mask
+        rng = torch.Generator(device=a.device)
+        rng.manual_seed(self.seed)
+        random_mask = torch.bernoulli(torch.clamp(masked_diff, 0, 1), generator=rng)
+        
+        # Interpolate between random mask and powered differences
+        interpolated_mask = torch.lerp(random_mask, masked_diff, self.gamma)
+        
+        # Apply final interpolation
+        result = a * (1 - interpolated_mask) + b * interpolated_mask
+        
+        return result.to(a.dtype)
+
+
 class WeightSumCutoff(Operation):
     def __init__(self,key,alpha, beta, gamma, *sources):
         super().__init__(key,*sources)

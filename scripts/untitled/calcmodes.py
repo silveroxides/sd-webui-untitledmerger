@@ -66,13 +66,61 @@ class InterpDifference(CalcMode):
 
     def create_recipe(key, model_a, model_b, model_c, alpha=0, beta=0, gamma=0, delta = 0, seed=0, **kwargs):
         a = opr.LoadTensor(key,model_a)
-        if key.startswith('cond_stage_model.transformer.text_model.embeddings'):
+        if key.startswith('cond_stage_model.transformer.text_model.embeddings') or key.startswith('conditioner.embedders.0.transformer.text_model.embeddings') or key.startswith('conditioner.embedders.1.model.token_embedding') or key.startswith('conditioner.embedders.1.model.positional_embedding'):
             return a
         b = opr.LoadTensor(key,model_b)
 
         return opr.InterpolateDifference(key, alpha, beta, gamma, seed, a ,b)
     
 CALCMODES_LIST.append(InterpDifference)
+
+
+class ManEnhInterpDifference(CalcMode):
+    name = 'Enhanced Man Interp'
+    description = 'Enchanced interpolation between each pair of values from A and B depending on their difference relative to other values'
+    input_models = 2
+    input_sliders = 4
+    slid_a_info = "interpolation strength"
+    slid_a_config = (0, 1, 0.001)
+    slid_b_info = "lower mean threshold"
+    slid_b_config = (0, 1, 0.001)
+    slid_c_info = "upper mean threshold"
+    slid_c_config = (0, 1, 0.001)
+    slid_d_info = "smoothness factor"
+    slid_d_config = (0, 1, 0.001)
+
+    def create_recipe(key, model_a, model_b, model_c, alpha=0, beta=0, gamma=0, delta = 0, seed=0, **kwargs):
+        a = opr.LoadTensor(key,model_a)
+        if key.startswith('cond_stage_model.transformer.text_model.embeddings'):
+            return a
+        b = opr.LoadTensor(key,model_b)
+
+        return opr.ManualEnhancedInterpolateDifference(key, alpha, beta, gamma, delta, seed, a ,b)
+    
+CALCMODES_LIST.append(ManEnhInterpDifference)
+
+
+class AutoEnhInterpDifference(CalcMode):
+    name = 'Enhanced Auto Interp'
+    description = 'Interpolates between each pair of values from A and B depending on their difference relative to other values'
+    input_models = 2
+    input_sliders = 3
+    slid_a_info = "interpolation strength"
+    slid_a_config = (0, 1, 0.001)
+    slid_b_info = "threshold adjustment factor"
+    slid_b_config = (0, 1, 0.001)
+    slid_c_info = "smoothness factor"
+    slid_c_config = (0, 1, 0.001)
+
+    def create_recipe(key, model_a, model_b, model_c, alpha=0, beta=0, gamma=0, delta = 0, seed=0, **kwargs):
+        a = opr.LoadTensor(key,model_a)
+        if key.startswith('cond_stage_model.transformer.text_model.embeddings'):
+            return a
+        b = opr.LoadTensor(key,model_b)
+
+        return opr.AutoEnhancedInterpolateDifference(key, alpha, beta, gamma, seed, a ,b)
+    
+CALCMODES_LIST.append(AutoEnhInterpDifference)
 
 
 class AddDifference(CalcMode):
