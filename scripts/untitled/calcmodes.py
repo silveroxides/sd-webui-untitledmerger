@@ -6,7 +6,7 @@ CALCMODES_LIST = []
 class CalcMode:
     name = 'calcmode'
     description = 'description'
-    input_models = 3
+    input_models = 4
     input_sliders = 3
 
     slid_a_info = '-'
@@ -21,7 +21,7 @@ class CalcMode:
     slid_d_info = '-'
     slid_d_config = (-1, 2, 0.01)
 
-    def create_recipe(self, key, model_a, model_b, model_c, seed=False, alpha=0, beta=0, gamma=0, delta=0) -> opr.Operation:
+    def create_recipe(self, key, model_a, model_b, model_c, model_d, seed=False, alpha=0, beta=0, gamma=0, delta=0) -> opr.Operation:
         raise NotImplementedError
 
 
@@ -33,7 +33,7 @@ class WeightSum(CalcMode):
     slid_a_info = "model_a - model_b"
     slid_a_config = (0, 1, 0.01)
 
-    def create_recipe(key, model_a, model_b, model_c, alpha=0, **kwargs):
+    def create_recipe(key, model_a, model_b, model_c, model_d, alpha=0, **kwargs):
         #This is used when constructing the recipe for the merge, tensors are not handled here.
         a = opr.LoadTensor(key,model_a)
         b = opr.LoadTensor(key,model_b)
@@ -64,7 +64,7 @@ class InterpDifference(CalcMode):
     slid_c_info = "binomial - linear"
     slid_c_config = (0, 1, 0.01)
 
-    def create_recipe(key, model_a, model_b, model_c, alpha=0, beta=0, gamma=0, delta = 0, seed=0, **kwargs):
+    def create_recipe(key, model_a, model_b, model_c, model_d, alpha=0, beta=0, gamma=0, delta = 0, seed=0, **kwargs):
         a = opr.LoadTensor(key,model_a)
         if key.startswith('cond_stage_model.transformer.text_model.embeddings') or key.startswith('conditioner.embedders.0.transformer.text_model.embeddings') or key.startswith('conditioner.embedders.1.model.token_embedding') or key.startswith('conditioner.embedders.1.model.positional_embedding'):
             return a
@@ -89,7 +89,7 @@ class ManEnhInterpDifference(CalcMode):
     slid_d_info = "smoothness factor"
     slid_d_config = (0, 1, 0.001)
 
-    def create_recipe(key, model_a, model_b, model_c, alpha=0, beta=0, gamma=0, delta = 0, seed=0, **kwargs):
+    def create_recipe(key, model_a, model_b, model_c, model_d, alpha=0, beta=0, gamma=0, delta = 0, seed=0, **kwargs):
         a = opr.LoadTensor(key,model_a)
         if key.startswith('cond_stage_model.transformer.text_model.embeddings'):
             return a
@@ -112,7 +112,7 @@ class AutoEnhInterpDifference(CalcMode):
     slid_c_info = "smoothness factor"
     slid_c_config = (0, 1, 0.001)
 
-    def create_recipe(key, model_a, model_b, model_c, alpha=0, beta=0, gamma=0, delta = 0, seed=0, **kwargs):
+    def create_recipe(key, model_a, model_b, model_c, model_d, alpha=0, beta=0, gamma=0, delta = 0, seed=0, **kwargs):
         a = opr.LoadTensor(key,model_a)
         if key.startswith('cond_stage_model.transformer.text_model.embeddings'):
             return a
@@ -133,7 +133,7 @@ class AddDifference(CalcMode):
     slid_b_info = "smooth (slow)"
     slid_b_config = (0, 1, 1)
 
-    def create_recipe(key, model_a, model_b, model_c, alpha=0, beta=0, **kwargs):
+    def create_recipe(key, model_a, model_b, model_c, model_d, alpha=0, beta=0, **kwargs):
         a = opr.LoadTensor(key,model_a)
         b = opr.LoadTensor(key,model_b)
         c = opr.LoadTensor(key,model_c)
@@ -159,7 +159,7 @@ class TrainDifference(CalcMode):
     slid_a_info = "addition multiplier"
     slid_a_config = (-1, 2, 0.01)
 
-    def create_recipe(key, model_a, model_b, model_c, alpha=0, **kwargs):
+    def create_recipe(key, model_a, model_b, model_c, model_d, alpha=0, **kwargs):
         a = opr.LoadTensor(key,model_a)
         b = opr.LoadTensor(key,model_b)
         c = opr.LoadTensor(key,model_c)
@@ -193,7 +193,7 @@ class Extract(CalcMode):
     slid_d_info = 'addition multiplier'
     slid_d_config = (-1, 4, 0.01)
 
-    def create_recipe(key, model_a, model_b, model_c, alpha=0, beta=0, gamma=0, delta=1, **kwargs):
+    def create_recipe(key, model_a, model_b, model_c, model_d, alpha=0, beta=0, gamma=0, delta=1, **kwargs):
         a = opr.LoadTensor(key,model_a)
         b = opr.LoadTensor(key,model_b)
         c = opr.LoadTensor(key,model_c)
@@ -224,7 +224,7 @@ class AddDisimilarity(CalcMode):
     slid_c_info = 'similarity bias'
     slid_c_config = (0, 2, 0.01)
 
-    def create_recipe(key, model_a, model_b, model_c, alpha=0, beta=0, gamma=0, delta=1, **kwargs):
+    def create_recipe(key, model_a, model_b, model_c, model_d, alpha=0, beta=0, gamma=0, delta=1, **kwargs):
         a = opr.LoadTensor(key,model_a)
         b = opr.LoadTensor(key,model_b)
         c = opr.LoadTensor(key,model_c)
@@ -250,7 +250,7 @@ class PowerUp(CalcMode):
     slid_b_info = "addition multiplier"
     slid_b_config = (-1, 4, 0.01)
 
-    def create_recipe(key, model_a, model_b, model_c, alpha=0, beta=0, seed=0, **kwargs):
+    def create_recipe(key, model_a, model_b, model_c, model_d, alpha=0, beta=0, seed=0, **kwargs):
         a = opr.LoadTensor(key,model_a)
         b = opr.LoadTensor(key,model_b)
 

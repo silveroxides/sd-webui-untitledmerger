@@ -118,17 +118,25 @@ def on_ui_tabs():
                     with gr.Column(variant='compact',min_width=150,scale=slider_scale):
                         with gr.Row():
                             model_c = gr.Dropdown(get_checkpoints_list('Alphabetical'), label="model_c [Tertiary]",scale=slider_scale)
-                            refresh_button = gr.Button(value='🔄', elem_classes=["tool"],scale=1)
+                            refresh_button = gr.Button(value='⇆', elem_classes=["tool"],scale=1)
                         model_c_info = gr.HTML(plaintext_to_html('None | None',classname='untitled_sd_version'))
                         model_c.change(fn=checkpoint_changed,inputs=model_c,outputs=model_c_info)
+
+                    with gr.Column(variant='compact',min_width=150,scale=slider_scale):
+                        with gr.Row():
+                            model_d = gr.Dropdown(get_checkpoints_list('Alphabetical'), label="model_d [Supplementary]",scale=slider_scale)
+                            refresh_button = gr.Button(value='🔄', elem_classes=["tool"],scale=1)
+                        model_d_info = gr.HTML(plaintext_to_html('None | None',classname='untitled_sd_version'))
+                        model_d.change(fn=checkpoint_changed,inputs=model_d,outputs=model_d_info)
 
                     checkpoint_sort = gr.Dropdown(min_width=60,scale=1,visible=True,choices=['Alphabetical','Newest first'],value='Alphabetical',label='Sort')
 
                     def swapvalues(x,y): return gr.update(value=y), gr.update(value=x)
                     swap_models_AB.click(fn=swapvalues,inputs=[model_a,model_b],outputs=[model_a,model_b])
                     swap_models_BC.click(fn=swapvalues,inputs=[model_b,model_c],outputs=[model_b,model_c])
-                    refresh_button.click(fn=refresh_models,inputs=checkpoint_sort, outputs=[model_a,model_b,model_c])
-                    checkpoint_sort.change(fn=refresh_models,inputs=checkpoint_sort,outputs=[model_a,model_b,model_c])
+                    swap_models_CD.click(fn=swapvalues,inputs=[model_c,model_d],outputs=[model_c,model_d])
+                    refresh_button.click(fn=refresh_models,inputs=checkpoint_sort, outputs=[model_a,model_b,model_c,model_d])
+                    checkpoint_sort.change(fn=refresh_models,inputs=checkpoint_sort,outputs=[model_a,model_b,model_c,model_d])
 
 
                 #### MODE SELECTION
@@ -161,7 +169,7 @@ def on_ui_tabs():
                         with gr.Row():
                             save_settings = gr.CheckboxGroup(label = " ",choices=["Autosave","Overwrite","fp16"],value=['fp16'],interactive=True,scale=2,min_width=100)
                             save_loaded = gr.Button(value='Save loaded checkpoint',size='sm',scale=1)
-                            save_loaded.click(fn=misc_util.save_loaded_model, inputs=[save_name,save_settings],outputs=status).then(fn=refresh_models, inputs=checkpoint_sort,outputs=[model_a,model_b,model_c])
+                            save_loaded.click(fn=misc_util.save_loaded_model, inputs=[save_name,save_settings],outputs=status).then(fn=refresh_models, inputs=checkpoint_sort,outputs=[model_a,model_b,model_c,model_d])
 
                 #### MERGE BUTTONS
                     with gr.Column():
@@ -410,6 +418,7 @@ def on_ui_tabs():
                 model_a,
                 model_b,
                 model_c,
+                model_d,
                 alpha,
                 beta,
                 gamma,

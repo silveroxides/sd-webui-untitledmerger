@@ -41,7 +41,7 @@ for calcmode_obj in calcmodes.CALCMODES_LIST:
     calcmode_selection.update({calcmode_obj.name: calcmode_obj})
 
 
-def parse_arguments(progress,calcmode_name,model_a,model_b,model_c,slider_a,slider_b,slider_c,slider_d,editor,discard,clude,clude_mode,seed,enable_sliders,active_sliders,*custom_sliders):
+def parse_arguments(progress,calcmode_name,model_a,model_b,model_c,model_d,slider_a,slider_b,slider_c,slider_d,editor,discard,clude,clude_mode,seed,enable_sliders,active_sliders,*custom_sliders):
     calcmode = calcmode_selection[calcmode_name]
     parsed_targets = {}
 
@@ -80,7 +80,7 @@ def parse_arguments(progress,calcmode_name,model_a,model_b,model_c,slider_a,slid
 
     checkpoints = []
     progress('Using Checkpoints:')
-    for n, model in enumerate((model_a,model_b,model_c)):
+    for n, model in enumerate((model_a,model_b,model_c,model_d)):
         if n+1 > calcmode.input_models:
             checkpoints.append('')
             continue

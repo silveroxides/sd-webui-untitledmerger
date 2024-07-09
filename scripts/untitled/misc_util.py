@@ -255,21 +255,24 @@ def image_gen(task_id,promptbox,negative_promptbox,steps,sampler_name,width,heig
     return processed.images, processed.infotexts, ui_common.plaintext_to_html(processed.comments)
 
 
-def find_checkpoint_w_config(config_source, model_a, model_b, model_c):
+def find_checkpoint_w_config(config_source, model_a, model_b, model_c, model_d):
     a = sd_models.get_closet_checkpoint_match(model_a)
     b = sd_models.get_closet_checkpoint_match(model_b)
     c = sd_models.get_closet_checkpoint_match(model_c)
+    d = sd_models.get_closet_checkpoint_match(model_d)
 
     config = lambda x: x if sd_models_config.find_checkpoint_config_near_filename(x) else None
 
     if config_source == 0:
-        return config(a) or config(b) or config(c) or a
+        return config(a) or config(b) or config(c) or config(d) or a
     elif config_source == 1:
         return a
     elif config_source == 2:
         return b or a
-    else:
+    elif config_source == 3:
         return c or a
+    else:
+        return d or a
 
 
 def copy_config(origin,target):
