@@ -97,7 +97,7 @@ def on_ui_tabs():
         dummy_component = gr.Textbox(visible=False,interactive=True)
         with ui_components.ResizeHandleRow():
             with gr.Column():
-                status = gr.Textbox(max_lines=3,lines=3,show_label=False,info="",interactive=False,render=False)
+                status = gr.Textbox(max_lines=4,lines=4,show_label=False,info="",interactive=False,render=False)
                 #### MODEL SELECTION
                 with gr.Row():
                     slider_scale = 8
@@ -569,7 +569,7 @@ def refresh_models(sort):
     sd_models.list_models()
     checkpoints_list = get_checkpoints_list(sort)
 
-    return gr.update(choices=checkpoints_list),gr.update(choices=checkpoints_list),gr.update(choices=checkpoints_list)
+    return gr.update(choices=checkpoints_list),gr.update(choices=checkpoints_list),gr.update(choices=checkpoints_list),gr.update(choices=checkpoints_list)
 
 
 ### CUSTOM SLIDER FUNCS
