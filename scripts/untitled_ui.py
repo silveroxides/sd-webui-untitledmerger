@@ -144,14 +144,6 @@ def on_ui_tabs():
                     mode_selector = gr.Radio(label='Merge mode:',choices=list(merger.calcmode_selection.keys()),value=list(merger.calcmode_selection.keys())[0],scale=3)
 
 
-                #### SNEED
-                with gr.Row():
-                    merge_seed = gr.Number(label='Merge Seed', value=99,  min_width=100, precision=0,scale=1)
-                    merge_random_seed = ui_components.ToolButton(ui.random_symbol, tooltip="Set seed to -1, which will cause a new random number to be used every time")
-                    merge_random_seed.click(fn=lambda:-1, outputs=merge_seed)
-                    merge_reuse_seed = ui_components.ToolButton(ui.reuse_symbol, tooltip="Reuse seed from last generation, mostly useful if it was randomized")
-                    merge_reuse_seed.click(fn=lambda:cmn.last_merge_seed, outputs=merge_seed)
-
                 ##### MAIN SLIDERS
                 with gr.Row(equal_height=True):
                     alpha = gr.Slider(minimum=-1,step=0.01,maximum=2,label="slider_a [α] (alpha)",info='model_a - model_b',value=0.5,elem_classes=['main_sliders'])
@@ -182,6 +174,13 @@ def on_ui_tabs():
                             stop_button = gr.Button(value='Stop')
                             def stopfunc(): cmn.stop = True;shared.state.interrupt()
                             stop_button.click(fn=stopfunc)
+                        #### SNEED
+                        with gr.Row():
+                            merge_seed = gr.Number(label='Merge Seed', value=99,  min_width=100, precision=0,scale=1)
+                            merge_random_seed = ui_components.ToolButton(ui.random_symbol, tooltip="Set seed to -1, which will cause a new random number to be used every time")
+                            merge_random_seed.click(fn=lambda:-1, outputs=merge_seed)
+                            merge_reuse_seed = ui_components.ToolButton(ui.reuse_symbol, tooltip="Reuse seed from last generation, mostly useful if it was randomized")
+                            merge_reuse_seed.click(fn=lambda:cmn.last_merge_seed, outputs=merge_seed)
 
                 ### INCLUDE EXCLUDE
                 with gr.Accordion(label='Include/Exclude/Discard',open=False):
@@ -311,16 +310,16 @@ def on_ui_tabs():
                                         gr.Slider,
                                         {'step':2,
                                             'minimum':2,
-                                            'maximum':10,
+                                            'maximum':20,
                                             'label':'Worker thread count:',
                                             'info':'Relevant for both cuda and CPU merging. Using too many threads can harm performance. Your core-count +-2 is a good guideline.'},
                                             default=8)
 
                     cache_size_slider = cmn.opts.create_option('cache_size',
                                         gr.Slider,
-                                        {'step':128,
+                                        {'step':64,
                                             'minimum':0,
-                                            'maximum':8192,
+                                            'maximum':16384,
                                             'label':'Cache size (MB):',
                                             'info':'Stores the result of intermediate calculations, such as the difference between B and C in add-difference before its multiplied and added to A.'},
                                             default=4096)
