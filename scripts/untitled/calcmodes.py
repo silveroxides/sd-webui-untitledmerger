@@ -263,4 +263,21 @@ class PowerUp(CalcMode):
 
 CALCMODES_LIST.append(PowerUp)
 
+class DELLA(CalcMode):
+    name = 'DELLA'
+    description = 'Drop and rescaLe via sampLing with magnitude'
+    input_models = 2
+    input_sliders = 3
+    slid_a_info = "dropout rate"
+    slid_a_config = (0, 1, 0.01)
+    slid_b_info = "rescale factor"
+    slid_b_config = (0, 1, 0.01)
+    slid_c_info = "magnitude threshold"
+    slid_c_config = (0, 1, 0.01)
 
+    def create_recipe(key, model_a, model_b, model_c, model_d, alpha=0, beta=0, gamma=0, delta=0, seed=0, **kwargs):
+        a = opr.LoadTensor(key, model_a)
+        b = opr.LoadTensor(key, model_b)
+        return opr.DELLA(key, alpha, beta, gamma, seed, a, b)
+
+CALCMODES_LIST.append(DELLA)
