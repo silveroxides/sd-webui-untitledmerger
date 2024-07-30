@@ -186,6 +186,30 @@ class PowerUp(Operation):
         # Scale the masked delta by the dropout rate to get δ̂^t
         delta_hat = delta_tilde / (1 - self.alpha)
         return delta_hat
+
+class DELLA(Operation):
+    def __init__(self, key, alpha, beta, gamma, seed, *sources):
+        super().__init__(key, *sources)
+        self.alpha = alpha  # dropout rate
+        self.beta = beta    # rescale factor
+        self.gamma = gamma  # magnitude threshold
+        self.seed = seed
+
+    def oper(self, a, b):
+        delta = b - a
+        
+        # Generate mask for dropout
+        rng = torch.Generator(device=delta.device).manual_seed(self.seed)
+        mask = torch.bernoulli(torch.ones_like(delta) * (1 - self.alpha), generator=rng)
+        
+        # Apply dropout and rescale
+        pruned_delta = delta * mask
+        rescaled_delta = pruned_delta / (1 - self.alpha)
+        
+        # Apply magnitude threshold
+        final_delta = torch.where(torch.abs(delta) > self.gamma, rescaled_delta, torch.zeros_like(rescaled_delta))
+        
+        return a + final_delta * self.beta
     
 
 def resize_tensors(tensor1, tensor2):
