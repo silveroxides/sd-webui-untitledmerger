@@ -264,3 +264,29 @@ class PowerUp(CalcMode):
 CALCMODES_LIST.append(PowerUp)
 
 
+# class NotWorkingSingularValue(CalcMode):
+#     name = 'Singular Value Decomposition (SVD)'
+#     description = 'Adds the capabilities of model B to model A through value singular value decomposition.'
+#     input_models = 2
+#     input_sliders = 2
+#     slid_a_info = "threshold for significant singular values"
+#     slid_a_config = (0, 1, 0.01)
+#     slid_b_info = "used to determine which singular values to keep"
+#     slid_b_config = (-1, 4, 0.01)
+#     slid_c_info = "multiply weight of the singular value"
+#     slid_c_config = (-1, 4, 0.01)
+# 
+#     def create_recipe(key, model_a, model_b, model_c, model_d, alpha=0, beta=0, gamma=0, seed=0, **kwargs):
+#         a = opr.LoadTensor(key,model_a)
+#         b = opr.LoadTensor(key,model_b)
+# 
+#         svd = opr.SingularValueDeOperator(key, alpha, beta, seed, a, b)
+#         svd.cache()
+#         b.pop()
+# 
+#         res = opr.Multiply(key, gamma, svd)
+# 
+#         return opr.Add(key, a, res)
+# 
+# CALCMODES_LIST.append(NotWorkingSingularValue)
+

@@ -330,6 +330,37 @@ class AutoEnhancedInterpolateDifference(Operation):
         
         return result.to(a.dtype)
 
+#class SingularValueDeOperator(Operation):
+#    def __init__(self, key, alpha, beta, seed, *sources):
+#        super().__init__(key, *sources)
+#        self.alpha = alpha  # threshold for significant singular values
+#        self.beta = beta    # used to determine which singular values to keep
+#
+#    def oper(self, a, b):
+#        assert a.shape == b.shape, "Tensors must have the same shape"
+#
+#        diff = a - b
+#        U, S, Vh = torch.linalg.svd(diff)
+#
+#        # Apply thresholding based on alpha
+#        significant_values = S > self.alpha
+#
+#        # Optionally keep only top k singular values based on beta
+#        if self.beta < 1:
+#            k = max(1, int(self.beta * len(S)))
+#            top_k_mask = torch.empty_like(significant_values)
+#            top_k_mask[:k] = True
+#            significant_values = significant_values & top_k_mask
+#
+#        # Reconstruct the difference using only significant singular values
+#        S_filtered = S * significant_values
+#        rng = torch.Generator(device=a.device)
+#        rng.manual_seed(self.seed)
+#        reconstructed_diff = torch.matmul(U, torch.matmul(torch.diag(S_filtered), Vh), generator=rng)
+#
+#        result = reconstructed_diff
+#        return result
+
 
 class WeightSumCutoff(Operation):
     def __init__(self,key,alpha, beta, gamma, *sources):
