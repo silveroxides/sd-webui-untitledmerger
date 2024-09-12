@@ -52,6 +52,73 @@ class WeightSum(CalcMode):
 CALCMODES_LIST.append(WeightSum)
 
 
+class SubtractWeights(CalcMode):
+    name = 'Subtract-Weights'
+    description = '(model_a * alpha - model_b * beta) * gamma'
+    input_models = 2
+    input_sliders = 3
+    slid_a_info = "model_a ratio"
+    slid_a_config = (-1, 1, 0.01)
+    slid_b_info = "model_b ratio"
+    slid_b_config = (-1, 1, 0.01)
+    slid_c_info = "total ratio"
+    slid_c_config = (-1, 1, 0.01)
+
+    def create_recipe(key, model_a, model_b, model_c, model_d, alpha=1, beta=1, gamma=1, **kwargs):
+        #This is used when constructing the recipe for the merge, tensors are not handled here.
+        a = opr.LoadTensor(key,model_a)
+        b = opr.LoadTensor(key,model_b)
+
+
+        c = opr.Multiply(key, alpha, a)
+        d = opr.Multiply(key, beta, b)
+        
+        e = opr.Sub(key, c, d)
+        res = opr.Multiply(key, gamma, e)
+        return res
+    
+CALCMODES_LIST.append(SubtractWeights)
+
+
+class DecomposedWithPad(CalcMode):
+    name = 'Decompose-With-Pad'
+    description = 'SVD with padding'
+    input_models = 2
+    input_sliders = 4
+    slid_a_info = "model_b * alpha"
+    slid_a_config = (0, 1, 0.001)
+    slid_b_info = "diff * beta"
+    slid_b_config = (0, 1, 0.001)
+    slid_c_info = "rank"
+    slid_c_config = (1, 768, 1)
+    slid_d_info = "quantile"
+    slid_d_config = (0, 1, 0.001)
+
+    def create_recipe(key, model_a, model_b, model_c, model_d, alpha=0, beta=0, gamma=0, delta = 0, seed=0, **kwargs):
+        a = opr.LoadTensor(key,model_a)
+        b = opr.LoadTensor(key,model_b)
+
+
+        b = opr.Multiply(key, alpha, b)
+        
+        c = opr.Sub(key, a, b)
+        d = opr.Multiply(key, beta, c)
+
+
+        d = opr.Decompose(key, gamma, delta, d)
+        numdims = 2
+        if key.endswith('.weight'):
+            res = opr.PadTensor(key, a, d)
+        elif key.endswith('.bias'):
+            res = opr.PadTensor(key, a, d)
+        else:
+            return a
+
+        return res
+    
+CALCMODES_LIST.append(DecomposedWithPad)
+
+
 class InterpDifference(CalcMode):
     name = 'Comparative Interp'
     description = 'Interpolates between each pair of values from A and B depending on their difference relative to other values'
@@ -262,6 +329,27 @@ class PowerUp(CalcMode):
         return opr.Add(key, a, res)
 
 CALCMODES_LIST.append(PowerUp)
+
+
+class WeightSumCutOff(CalcMode):
+    name = 'Weighted Sum CutOff'
+    description = 'Weighted Sum variant that determines distribution through inclusive/exclusive mean threshold'
+    input_models = 2
+    input_sliders = 3
+    slid_a_info = "A scaling factor that controls how much influence the difference-based weight has"
+    slid_a_config = (0, 1, 0.001)
+    slid_b_info = "lower mean threshold"
+    slid_b_config = (0, 1, 0.001)
+    slid_c_info = "upper mean threshold"
+    slid_c_config = (0, 1, 0.001)
+
+    def create_recipe(key, model_a, model_b, model_c, model_d, alpha=0, beta=0, gamma=0, delta = 0, seed=0, **kwargs):
+        a = opr.LoadTensor(key,model_a)
+        b = opr.LoadTensor(key,model_b)
+        
+        return opr.WeightSumCutoff(key, alpha, beta, gamma, a ,b)
+    
+CALCMODES_LIST.append(WeightSumCutOff)
 
 
 # class NotWorkingSingularValue(CalcMode):

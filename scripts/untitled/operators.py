@@ -66,6 +66,13 @@ class LoadTensor(Operation):
     def merge(self) -> torch.Tensor:
         return cmn.loaded_checkpoints[self.alpha].get_tensor(self.key).to(cmn.device())
 
+class TensorShape(Operation):
+    def __init__(self,key,alpha,*sources):
+        super().__init__(key,*sources)
+        self.alpha = alpha
+
+    def oper(self,a) -> torch.Tensor:
+        return a.shape[self.alpha]
 
 class Multiply(Operation):
     def __init__(self,key,alpha,*sources):
@@ -90,6 +97,65 @@ class Sub(Operation):
 
     def oper(self,a,b) -> torch.Tensor:
         return a - b
+
+class Decompose(Operation):
+    def __init__(self,key,alpha,beta,*args):
+        super().__init__(key,*args)
+        self.alpha = alpha
+        self.beta = beta
+
+    def oper(self,a) -> torch.Tensor:
+        conv2d = (len(a.shape) == 4)
+        kernel_size = None if not conv2d else a.size()[2:4]
+        conv2d_3x3 = conv2d and kernel_size != (1, 1)
+        out_dim, in_dim = a.size()[0:2]
+        alpha = min(alpha, in_dim, out_dim)
+        
+        if conv2d:
+            if conv2d_3x3:
+                a = a.flatten(start_dim=1)
+            else:
+                a = a.squeeze()
+        
+        
+        U, S, Vh = torch.linalg.svd(a.float())
+        U = U[:, :alpha]
+        S = S[:alpha]
+        U = U @ torch.diag(S)
+        Vh = Vh[:alpha, :]
+        
+        dist = torch.cat([U.flatten(), Vh.flatten()])
+        hi_val = torch.quantile(dist, beta)
+        low_val = -hi_val
+        
+        U = U.clamp(low_val, hi_val)
+        Vh = Vh.clamp(low_val, hi_val)
+        if conv2d:
+            U = U.reshape(out_dim, alpha, 1, 1)
+            Vh = Vh.reshape(alpha, in_dim, kernel_size[0], kernel_size[1])
+        return (U, Vh)
+
+class PadTensor(Operation):
+    def __init__(self,key,*args):
+        super().__init__(key,*args)
+
+    #loadtensor uses merge instead of oper as it has no model inputs, use oper everywhere else 
+    def oper(self,a, b) -> torch.Tensor:
+        
+        if len(a.shape) <= 1:
+            if b.shape[0] != a.shape[0]:
+                res = F.pad(b, (0, a.shape[-1] - b.shape[-1]))
+        elif len(a.shape) > 1:
+            if key.endswith('.weight'):
+                if a.shape[0] != a.shape[0]:
+                    b = torch.transpose(a, 0, 1)
+                    c = F.pad(b, (0, a.shape[-1] - b.shape[-1]))
+                    res = torch.transpose(c, 0, 1)
+            elif key.endswith('.bias'):
+                if b.shape[1] != a.shape[1]:
+                    res = F.pad(b, (0, a.shape[-1] - b.shape[-1]))
+
+        return res
 
 
 class Smooth(Operation):
