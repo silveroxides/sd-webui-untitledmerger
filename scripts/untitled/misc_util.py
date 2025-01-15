@@ -153,7 +153,12 @@ def save_loaded_model(name,settings):
 
 def save_state_dict(state_dict,name,settings,timer=None):
     global recently_saved
-    fileext = ".fp16.safetensors" if 'fp16' in settings else '.safetensors'
+    if 'fp16' in settings:
+        fileext = ".fp16.safetensors"
+    elif 'bf16' in settings:
+        fileext = ".bf16.safetensors"
+    else:
+        fileext = '.safetensors'
 
     checkpoint_dir = shared.cmd_opts.ckpt_dir or os.path.join(paths_internal.models_path, 'Stable-diffusion')
     filename_no_ext = os.path.join(checkpoint_dir, name)
@@ -171,6 +176,10 @@ def save_state_dict(state_dict,name,settings,timer=None):
     if 'fp16' in settings:
         for key,tensor in state_dict.items():
             state_dict[key] = tensor.type(torch.float16)
+
+    if 'bf16' in settings:
+        for key,tensor in state_dict.items():
+            state_dict[key] = tensor.type(torch.bfloat16)
 
     try:
         safetensors.torch.save_file(state_dict,filename)

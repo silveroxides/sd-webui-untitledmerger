@@ -235,7 +235,7 @@ class InterpolateDifference(Operation):
         rngenerator.manual_seed(self.seed)
         bitmask = torch.bernoulli(torch.clamp(diff,0,1),out=torch.empty_like(diff),generator=rngenerator)
 
-        interpolated_mask = torch.lerp(bitmask, diff, self.gamma).to(a.dtype)
+        interpolated_mask = torch.lerp(bitmask, diff, self.gamma)
 
         res = a * (1 - interpolated_mask) + b * interpolated_mask
         return res
@@ -281,7 +281,7 @@ class ManualEnhancedInterpolateDifference(Operation):
         # Apply final interpolation
         result = a * (1 - interpolated_mask) + b * interpolated_mask
         
-        return result.to(a.dtype)
+        return result
 
 class AutoEnhancedInterpolateDifference(Operation):
     def __init__(self, key, alpha, beta, gamma, seed, *sources):
@@ -328,7 +328,7 @@ class AutoEnhancedInterpolateDifference(Operation):
         # Apply final interpolation
         result = a * (1 - interpolated_mask) + b * interpolated_mask
         
-        return result.to(a.dtype)
+        return result
 
 #class SingularValueDeOperator(Operation):
 #    def __init__(self, key, alpha, beta, seed, *sources):

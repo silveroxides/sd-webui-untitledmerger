@@ -160,7 +160,7 @@ def on_ui_tabs():
                         with gr.Column(variant='panel'):
                             save_name = gr.Textbox(max_lines=1,label='Save checkpoint as:',lines=1,placeholder='Enter name...',scale=2)
                             with gr.Row():
-                                save_settings = gr.CheckboxGroup(label = " ",choices=["Autosave","Overwrite","fp16"],value=['fp16'],interactive=True,scale=2,min_width=100)
+                                save_settings = gr.CheckboxGroup(label = " ",choices=["Autosave","Overwrite","fp16","bf16"],value=['fp16'],interactive=True,scale=2,min_width=100)
                                 save_loaded = gr.Button(value='Save loaded checkpoint',size='sm',scale=1)
                                 save_loaded.click(fn=misc_util.save_loaded_model, inputs=[save_name,save_settings],outputs=status).then(fn=refresh_models, inputs=checkpoint_sort,outputs=[model_a,model_b,model_c,model_d])
             
